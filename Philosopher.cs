@@ -19,6 +19,10 @@ namespace Lab4_SystemProgramming_
 		public Color philosopherState;
 		private static bool[] _forks;
         private static object _checkLock = new object();
+		public static int _lowerBorderInterval;
+		public static int _upperBorderInterval;
+		public static int totalTime;
+		public static int pastTime = 0;
 
 
         public Philosopher(int id, int seed, bool[] forks)
@@ -36,7 +40,7 @@ namespace Lab4_SystemProgramming_
 
 		public void LifeCycle()
 		{
-			while (true)
+			while (totalTime > pastTime)
 			{
 				while (_isHungry)
 				{
@@ -48,13 +52,11 @@ namespace Lab4_SystemProgramming_
                         philosopherState = Color.Green;
 						//Philosopher is eating
 						_timerDuringEating.Start();
-						_timeForNextAction = _random.Next(1000, 5000);
+						_timeForNextAction = _random.Next(_lowerBorderInterval, _upperBorderInterval);
                         
                         
-						Console.WriteLine($"Philosopher {_id} is eating");
 						Thread.Sleep(_timeForNextAction);
                         _timerDuringEating.Stop();
-                        Console.WriteLine($"Philosopher {_id} end eat");
                         ReleaseForks();
 
 						_isHungry = false;
@@ -65,10 +67,8 @@ namespace Lab4_SystemProgramming_
 				}
 				philosopherState = Color.Red;
 				//Philosopher is thinking
-				_timeForNextAction = _random.Next(1000, 5000);
-				Console.WriteLine($"Philosopher {_id} is thinking");
+				_timeForNextAction = _random.Next(_lowerBorderInterval, _upperBorderInterval);
 				Thread.Sleep(_timeForNextAction);
-				Console.WriteLine($"Philosopher {_id} end think");
 				_isHungry = true;
 			}
 		}

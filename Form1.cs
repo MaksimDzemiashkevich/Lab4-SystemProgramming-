@@ -9,18 +9,25 @@ public partial class Form1 : Form
     private const int CENTER_X = 250;
     private const int CENTER_Y = 250;
     private const int PLATE_RADIUS = 30;
+    private TextBox _totalTimeWork;
+    private TextBox _lowerBorderInterval;
+    private TextBox _upperBorderInterval;
+    private Button _startButton;
     private Label _labelTimers;
     private static bool[] forks = new bool[5];
 
     public Form1()
     {
         InitializeComponent();
-        this.DoubleBuffered = true;
-        MainProgram();
+        DoubleBuffered = true;
+        Start();
     }
 
-    public void MainProgram()
+    public void MainProgram(object sender, EventArgs e)
     {
+        Philosopher.totalTime = int.Parse(_totalTimeWork.Text);
+        Philosopher._lowerBorderInterval = int.Parse(_lowerBorderInterval.Text);
+        Philosopher._upperBorderInterval = int.Parse(_upperBorderInterval.Text);
         _philosophers = new Philosopher[5];
         Philosopher.InitializeSemaphores();
         for (int i = 0; i < _philosophers.Length; i++)
@@ -30,12 +37,26 @@ public partial class Form1 : Form
 
         System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         timer.Interval = 100;
-        timer.Tick += (s, e) => this.Invalidate();
+        timer.Tick += Update;
         timer.Start();
+    }
+
+    private void Start()
+    {
+        _totalTimeWork = CreaterTextBox(new Size(200, 40), new Point(400, 50), "Total time work");
+        _lowerBorderInterval = CreaterTextBox(new Size(200, 40), new Point(400, 90), "Lower border interval");
+        _upperBorderInterval = CreaterTextBox(new Size(200, 40), new Point(400, 130), "Upper border interval");
+        _startButton = CreaterButton(new Size(200, 70), new Point(400, 170), "Start");
+        _startButton.Click += MainProgram;
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
+        if (_philosophers == null)
+        {
+            return;
+        }
+        Philosopher.pastTime += 100;
         base.OnPaint(e);
         Graphics g = e.Graphics;
 
@@ -89,7 +110,7 @@ public partial class Form1 : Form
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < _philosophers.Length; i++)
         {
-            stringBuilder.AppendLine($"Philosopher {i} ate {_philosophers[i]._timerDuringEating.Elapsed}");
+            stringBuilder.AppendLine($"Philosopher {i} ate {_philosophers[i]._timerDuringEating.Elapsed.TotalSeconds}");
         }
         if (_labelTimers != null)
         {
@@ -108,4 +129,31 @@ public partial class Form1 : Form
         Controls.Add(label);
         return label;
     }
+
+    private TextBox CreaterTextBox(Size size, Point point, string placeHolder) 
+    {
+        TextBox textBox = new TextBox();
+        textBox.Size = size;
+        textBox.PlaceholderText = placeHolder;
+        textBox.Location = point;
+        Controls.Add(textBox);
+        return textBox;
+    }
+
+    private Button CreaterButton(Size size, Point point, string text)
+    {
+        Button button = new Button();
+        button.Size = size;
+        button.Text = text;
+        button.Location = point;
+        Controls.Add(button);
+        return button;
+    }
+
+    private void Update(object sender, EventArgs e)
+    {
+        Invalidate();
+    }
+
+
 }
